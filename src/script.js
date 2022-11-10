@@ -1,3 +1,4 @@
+
 import "./style.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -13,7 +14,7 @@ const particleTexture = textureLoader.load("/textures/particles/heart.png");
 /* -------------------------------- Particles ------------------------------- */
 // Geometry
 const particlesGeometry = new THREE.BufferGeometry();
-const count = 4269;
+const count = 8000;
 const positions = new Float32Array(count * 3);
 const colors = new Float32Array(count * 3);
 const magicNumber = 2.236; //range of the equation with real solutions
@@ -31,8 +32,8 @@ for (let i = 0; i < count * 3; i += 3) {
 }
 
 particlesGeometry.setAttribute(
-  "position",
-  new THREE.BufferAttribute(positions, 3)
+    "position",
+    new THREE.BufferAttribute(positions, 3)
 );
 particlesGeometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
@@ -44,14 +45,13 @@ particlesMaterial.size = 0.1;
 particlesMaterial.sizeAttenuation = true;
 
 //color
-particlesMaterial.color = new THREE.Color("#ff88cc");
+particlesMaterial.color = new THREE.Color("#FF0B6D");
 particlesMaterial.transparent = true;
 particlesMaterial.alphaMap = particleTexture;
 particlesMaterial.depthWrite = false;
 particlesMaterial.blending = THREE.AdditiveBlending;
-particlesMaterial.vertexColors = true;
 
-//❤️ Points
+//Points
 const particles = new THREE.Points(particlesGeometry, particlesMaterial);
 scene.add(particles);
 
@@ -77,13 +77,13 @@ window.addEventListener("resize", () => {
 /* --------------------------------- Camera --------------------------------- */
 // Base camera
 const camera = new THREE.PerspectiveCamera(
-  75,
-  sizes.width / sizes.height,
-  0.1,
-  100
+    80,
+    sizes.width / sizes.height,
+    0.1,
+    100
 );
 camera.position.z = 7;
-camera.position.y = 4;
+camera.position.y = 5;
 scene.add(camera);
 
 /* -------------------------------- Controls -------------------------------- */
@@ -102,20 +102,21 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 scene.add(axesHelper); */
 
 /* --------------------------------- Animate -------------------------------- */
-const clock = new THREE.Clock();
+let clock = new THREE.Clock();
 const tick = () => {
-  const elapsedTime = clock.getElapsedTime();
 
-  //Update particles
+  // Update particles
   for (let i = 0; i < count; i++) {
     let i3 = i * 3;
     const X = particlesGeometry.attributes.position.array[i3];
-    const A = (Math.sin(elapsedTime * 0.1) - 0.5) * 50 * 2;
-    particlesGeometry.attributes.position.array[i3 + 1] =
-      Math.pow(Math.abs(X), 2 / 3) +
-      0.9 *
+    const A = 0.5 * 50 * 2;
+    // const A = ((elapsedTime * 0.1) - 0.5) * 50 * 2;
+    particlesGeometry.attributes.position.array[i3+1] =
+        Math.pow(Math.abs(X), 2 / 3) +
+        0.9 *
         Math.pow(5 - Math.pow(Math.abs(X), 2), 1 / 2) *
         Math.sin(A * Math.abs(X));
+    // particlesGeometry.attributes.position.rotation.x += 0.05
   }
   particlesGeometry.attributes.position.needsUpdate = true;
 
@@ -129,4 +130,28 @@ const tick = () => {
   window.requestAnimationFrame(tick);
 };
 
+let frame = 0;
+
+const animation = () => {
+  particles.rotation.y += 0.008
+  let t = clock.getElapsedTime();
+
+  if (t >= 7.0){
+    particles.scale.x += Math.sin(frame) * 0.03;
+    particles.scale.y += Math.sin(frame) * 0.03;
+    particles.scale.z += Math.sin(frame) * 0.03;
+
+    frame += 0.003;
+  } else{
+    particles.scale.x += Math.sin(frame) * 0.02;
+    particles.scale.y += Math.sin(frame) * 0.02;
+    particles.scale.z += Math.sin(frame) * 0.02;
+
+    frame += 0.1;
+  }
+
+  window.requestAnimationFrame(animation);
+};
+
+animation();
 tick();
